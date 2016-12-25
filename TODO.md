@@ -1,6 +1,9 @@
+# TODO List
+
 ### Web Component
 
 - [ ] Interface to manually control lights
+- [ ] Create GPIO interface to add Hardware
 - [ ] Flesh out
 
 ### Bluetooth Component
