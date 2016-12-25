@@ -1,29 +1,8 @@
 from gpiozero import RGBLED, OutputDevice
 from gpiozero.pins.native import NativePin
-import logging
+import logging, weakref
 
 logger = logging.getLogger(__name__)
-
-class Hardware(object):
-    def __init__(self):
-        self.output_devices = {};
-        self.led_strips = {}
-
-    def create_output_device(self, name="pwr", pin=25):
-        if name not in self.output_devices:
-            output_object = output_device(OutputDevice(pin))
-            self.output_devices[name] = output_object
-
-    def create_led_strip(self, name="leds", pins=[18, 23, 24]):
-        
-        if len(pins) != 3:
-            raise ValueError("rgbPins should have 3 pins [red, green, blue]")
-
-        if name not in self.led_strips:
-            ledStrip_object = led_strip(RGBLED(red=pins[0], green=pins[1], blue=pins[2]))
-            self.led_strips[name] = ledStrip_object
-
-
 
 class output_device(object):
     def __init__(self, output_device):
@@ -72,7 +51,7 @@ class led_strip(object):
         """
         TODO: make this more reslient
         """
-        try: 
+        try:
             red = float(int(colorInHex[1:3], 16)) / 255
             green = float(int(colorInHex[3:5], 16)) / 255
             blue = float(int(colorInHex[5:], 16)) / 255
@@ -105,4 +84,44 @@ class led_strip(object):
         """
         pass
 
+class CachedHardwareManager(object):
+    def __init__(self):
+        self._cache = weakref.WeakValueDictionary()
 
+    def get_hardware(self, name):
+        if name not in self._cache:
+            hw = Hardware(name)
+            self._cache[name] = hw
+        else:
+            hw = self._cache[name]
+
+        return hw
+
+    def clear(self):
+        self._cache.clear()
+
+
+class Hardware(object):
+    manager = CachedHardwareManager()
+
+    def __init__(self, name):
+        self.name = name
+        self.output_devices = {};
+        self.led_strips = {}
+
+    def create_output_device(self, name="pwr", pin=25):
+        if name not in self.output_devices:
+            output_object = output_device(OutputDevice(pin))
+            self.output_devices[name] = output_object
+
+    def create_led_strip(self, name="leds", pins=[18, 23, 24]):
+
+        if len(pins) != 3:
+            raise ValueError("rgbPins should have 3 pins [red, green, blue]")
+
+        if name not in self.led_strips:
+            ledStrip_object = led_strip(RGBLED(red=pins[0], green=pins[1], blue=pins[2]))
+            self.led_strips[name] = ledStrip_object
+
+def get_hardware(name):
+    return Hardware.manager.get_hardware(name)

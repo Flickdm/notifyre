@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 import sys, logging
 import threading, asyncore
+import configparser
 
 from BT import BTServer
-from HW import Hardware
+from HW import get_hardware
 from WEB import create_app
+
+config = configparser.ConfigParser()
+config.read('config.cfg')
 
 logging.basicConfig(
             filename='notifyre-server.log',
@@ -13,23 +17,23 @@ logging.basicConfig(
             level=logging.DEBUG
             )
 
-def run_bluetooth(hw):
-    btserver = BTServer(hardware = hw, uuid = "4db81427-c67c-48a9-8be8-e9ae540f8e99", service_name = "Notifyre Server")
+def run_bluetooth():
+    btserver = BTServer(uuid = config['bt']['uuid'], service_name = config['bt']['service_name'])
     asyncore.loop(timeout=30.0)
 
-def run_web(hw):
-    app = create_app(hw, __name__)
-    app.run(host='0.0.0.0')
+def run_web():
+    app = create_app(__name__)
+    app.run(host=config['web']['ip'], port=config['web']['port'])
 
 def main(argv):
-    print("Notifyre Server")
+    print("Starting Notifyre Server")
 
-    hw = Hardware()
+    hw = get_hardware("gpio")
     hw.create_output_device("power", 25)
     hw.create_led_strip("leds", [18, 23, 24])
 
-    threading.Thread(target=run_bluetooth, args=(hw,)).start()
-    run_web(hw)
+    threading.Thread(target=run_bluetooth, daemon=True).start()
+    run_web()
 
 if __name__ == "__main__":
     main(sys.argv)

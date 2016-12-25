@@ -10,8 +10,8 @@ class BTHandler(asyncore.dispatcher):
         self._data = ""
 
     def writable(self):
-        """ 
-            IMPORTANT: Overwrite the writable method so that cpu doesn't max out 
+        """
+            IMPORTANT: Overwrite the writable method so that cpu doesn't max out
             NOTE: if there are characters in buffer it will freak out
         """
 
@@ -24,7 +24,7 @@ class BTHandler(asyncore.dispatcher):
             if not data:
                 return
 
-            zero_char_index = data.find(';') # chr(0)
+            zero_char_index = data.find(';')#chr(0))
             if zero_char_index == -1:
                 self._data += data
             else:
@@ -38,7 +38,8 @@ class BTHandler(asyncore.dispatcher):
         logger.debug("Connection to device was lost")
         self.close()
 
+
     def _handle_json(self):
-        self._server.handle_command(handler = self, data = self._data) 
-        #clear 
+        self._server.handle_command(handler = self, data = self._data)
+        #clear
         self._data = ""
