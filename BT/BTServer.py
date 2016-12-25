@@ -43,12 +43,23 @@ class BTServer(asyncore.dispatcher):
     def handle_command(self, handler, data):
         if "on" in data:
             self._hardware.output_devices["power"].on()
-            self._hardware.led_strips["leds"].set_color_hex("#FF0000")
+            self._hardware.led_strips["leds"].set_color_hex("#0000FF")
             self._hardware.led_strips["leds"].pulse()
         elif "off" in data:
             self._hardware.output_devices["power"].off()
             self._hardware.led_strips["leds"].set_color_hex("#000000")
+        elif "pow" in data:
+            self._hardware.output_devices["power"].toggle()
+        elif "ledo" in data:
+            self._hardware.led_strips["leds"].set_color_hex("#0000FF")
+            self._hardware.led_strips["leds"].pulse()
+        elif "ledf" in data:
+            self._hardware.led_strips["leds"].set_color_hex("#000000")
+        elif "#" in data:
+            self._hardware.led_strips["leds"].set_color_hex(data)
+        elif "fade" in data:
+            self._hardware.led_strips["leds"].blue2red()
         else:
-            pass
+            self._hardware.led_strips["leds"].set_color_word(data)
         
 

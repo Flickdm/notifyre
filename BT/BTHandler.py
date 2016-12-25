@@ -20,7 +20,7 @@ class BTHandler(asyncore.dispatcher):
     def handle_read(self):
 
         try:
-            data = self.recv(1204)
+            data = str(self.recv(1204), 'utf-8')
             if not data:
                 return
 

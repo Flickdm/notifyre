@@ -1,4 +1,8 @@
 from gpiozero import RGBLED, OutputDevice
+from gpiozero.pins.native import NativePin
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Hardware(object):
     def __init__(self):
@@ -37,10 +41,8 @@ class output_device(object):
     def toggle(self):
         if not self._is_output_device_on:
             self.on()
-            print "on"
         else:
             self.off()
-            print "off"
 
 class led_strip(object):
     def __init__(self, led_strip):
@@ -59,8 +61,9 @@ class led_strip(object):
         self._led_strip.pulse(fade_in_time=fade_in_time, fade_out_time=fade_out_time, on_color=on_color, off_color=off_color)
 
     def set_color_hex(self, color="#FF0000"):
-        self._led_strip.color = self._cvt_hex(color)
-        self._cur_color = color
+        if len(color) == 7:
+            self._led_strip.color = self._cvt_hex(color)
+            self._cur_color = color
 
     def set_color_word(self, color="red"):
         self._led_strip.color = self._color_map(color)
@@ -76,7 +79,8 @@ class led_strip(object):
 
             return (red, green, blue)
         except:
-            print "Exception in cvtHex"
+            return self._cvt_hex(self._cur_color)
+            logger.debug("Exception in cvtHex")
 
     def _color_map(self, color):
         return self._cvt_hex({
@@ -91,6 +95,9 @@ class led_strip(object):
             "magenta":  "#FF0080",
             "white":    "#FFFFFF"
         }.get(color, "#FF0000"))
+
+    def blue2red(self):
+        self._led_strip.pulse(fade_in_time=10, fade_out_time=10, on_color=(1,0,0), off_color=(0,0,1))
 
     def notification_state(self, notification_type):
         """
