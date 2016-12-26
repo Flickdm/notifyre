@@ -1,66 +1,84 @@
-from bluetooth import *
-import logging, asyncore
+"""Asynchronous Bluetooth Server responsible for delegating bluetooth connections
 
-from .BTHandler import BTHandler
+Todo:
+    Investigate BLE
+"""
+import logging
+import asyncore
+import bluetooth as BT
+
 from HW import get_hardware
+from .BTHandler import BTHandler
 
-hw = get_hardware("gpio")
 
-logger = logging.getLogger(__name__)
+HARDWARE = get_hardware("gpio")
+LOGGER = logging.getLogger(__name__)
 
 class BTServer(asyncore.dispatcher):
-    def __init__(self, uuid, service_name, port = PORT_ANY):
+    """This class is the server and delegates to the handler when a connection
+    is made
+    """
+    def __init__(self, uuid, service_name, port=BT.PORT_ANY):
+        """
+
+        Args:
+            uuid (str): Universally Unique Identifier
+            service_name (str): Name of servie
+            port (:obj:`bluetooth port`): dynamically assigned port
+        """
         asyncore.dispatcher.__init__(self)
 
-        if not is_valid_uuid(uuid):
-            raise ValueError("uuid %s is not valid" % uuid)
+        if not BT.is_valid_uuid(uuid):
+            raise ValueError("uuid %s is not valid", uuid)
 
         self.port = port
         self.uuid = uuid
         self.service_name = service_name
-        self.set_socket(BluetoothSocket(RFCOMM))
+        self.set_socket(BT.BluetoothSocket(BT.RFCOMM))
         self.bind(("", port))
         self.listen(1)
 
-        advertise_service(
-                    self.socket,
-                    service_name,
-                    service_id = uuid,
-                    #service_clases = [uuid, SERIAL_PORT_CLASS],
-                    profiles = [SERIAL_PORT_PROFILE]
-                )
+        BT.advertise_service(
+            self.socket,
+            service_name,
+            service_id=uuid,
+            #service_clases = [uuid, SERIAL_PORT_CLASS],
+            profiles=[BT.SERIAL_PORT_PROFILE]
+        )
 
         port = self.socket.getsockname()[1]
 
-        logger.info("Waiting for connection on RFCOMM channel %d" % port)
+        LOGGER.info("Waiting for connection on RFCOMM channel %d", port)
 
     def handle_accept(self):
+        """When we pair with a device pass off to handler to wait for event
+        """
         pair = self.accept()
         if pair is not None:
             sock, addr = pair
-            logger.debug("Incoming connection from %s" % repr(addr[0]))
-            handler = BTHandler(socket = sock, server = self)
+            LOGGER.debug("Incoming connection from %s", repr(addr[0]))
+            BTHandler(socket=sock, server=self)
 
-
-    #def handle_command(self, handler, data):
     def handle_command(self, handler, data):
+        """ handle the json returned by the handler
+        """
         if "on" in data:
-            hw.output_devices["power"].on()
-            hw.led_strips["leds"].set_color_hex("#0000FF")
-            hw.led_strips["leds"].pulse()
+            HARDWARE.output_devices["power"].on()
+            HARDWARE.led_strips["leds"].set_color_hex("#0000FF")
+            HARDWARE.led_strips["leds"].pulse()
         elif "off" in data:
-            hw.output_devices["power"].off()
-            hw.led_strips["leds"].set_color_hex("#000000")
+            HARDWARE.output_devices["power"].off()
+            HARDWARE.led_strips["leds"].set_color_hex("#000000")
         elif "pow" in data:
-            hw.output_devices["power"].toggle()
+            HARDWARE.output_devices["power"].toggle()
         elif "ledo" in data:
-            hw.led_strips["leds"].set_color_hex("#0000FF")
-            hw.led_strips["leds"].pulse()
+            HARDWARE.led_strips["leds"].set_color_hex("#0000FF")
+            HARDWARE.led_strips["leds"].pulse()
         elif "ledf" in data:
-            hw.led_strips["leds"].set_color_hex("#000000")
+            HARDWARE.led_strips["leds"].set_color_hex("#000000")
         elif "#" in data:
-            hw.led_strips["leds"].set_color_hex(data)
+            HARDWARE.led_strips["leds"].set_color_hex(data)
         elif "fade" in data:
-            hw.led_strips["leds"].blue2red()
+            HARDWARE.led_strips["leds"].blue2red()
         else:
-            hw.led_strips["leds"].set_color_word(data)
+            HARDWARE.led_strips["leds"].set_color_word(data)
