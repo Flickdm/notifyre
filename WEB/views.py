@@ -1,10 +1,13 @@
-from flask import render_template, Blueprint
+from flask import render_template, request, Blueprint
 from HW import get_hardware
 
 hw = get_hardware("gpio")
 main = Blueprint('main', __name__)
 
-@main.route('/')
+@main.route('/', methods=['GET', 'POST'])
 def index():
-    hw.output_devices["power"].toggle()
-    return "hello world!"#render_template('index.html')
+    if request.method == 'POST':
+        print(request.form)
+        hw.output_devices["power"].toggle()
+
+    return render_template('index.html')
