@@ -1,5 +1,8 @@
  #!/usr/bin/env python3
-"""This server allows for a user to receive and control the
+# -*- coding: utf-8 -*-
+
+"""
+ This server allows for a user to receive and control the
  raspberry pi's gpio pins over bluetooth (via json) and via web
  interface.
 
