@@ -2,15 +2,39 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1">
         <title>Control Panel</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css')}}">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     </head>
     <body>
-        <form class="" action="/" method="post">
-            <button type="submit" name="led" value="toggle">lights</button>
-            <br>
-            <input type="text" name="" value="">
-            <button type="submit" name="submit">Submit</button>
-
-        </form>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Output Devices</th>
+                    <th>Switches</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for device, status in devices.items() %}
+                <tr>
+                    <th>{{device}}</th>
+                    <th>
+                        <form class="" action="/devices/" method="post">
+                            <label class="switch">
+                                {% if status == True %}
+                                <input type="hidden" name="{{device}}" value="on" checked>
+                                <input type="checkbox" name="{{device}}" value="on" onChange="this.form.submit()" checked>
+                                {% else %}
+                                <input type="checkbox" name="{{device}}" value="off" onChange="this.form.submit()">
+                                {% endif %}
+                                <div class="slider round"></div>
+                            </label>
+                        </form>
+                    </th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </body>
 </html>
