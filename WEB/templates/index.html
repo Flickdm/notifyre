@@ -8,19 +8,21 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     </head>
     <body>
+        <!-- output_devices -->
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Output Devices</th>
-                    <th>Switches</th>
+                    <th>On/Off</th>
                 </tr>
             </thead>
             <tbody>
-                {% for device, status in devices.items() %}
+                {% for device, status in output_devices.items() %}
                 <tr>
                     <th>{{device}}</th>
                     <th>
-                        <form class="" action="/devices/" method="post">
+                        <form class="" action="/output_devices/" method="post">
+                            <input type="hidden" name="device" value="{{device}}">
                             <label class="switch">
                                 {% if status == True %}
                                 <input type="hidden" name="{{device}}" value="on" checked>
@@ -36,5 +38,55 @@
                 {% endfor %}
             </tbody>
         </table>
+        <!-- End output_devices -->
+
+        <!-- led_strips -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Led Strips</th>
+                    <th>On/Off</th>
+                    <th>Color</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for _, strip in led_strips.items() %}
+                <tr>
+                    <form class="" name="leds" action="/led_strips/" method="post">
+                    <th>{{ strip["name"] }}</th>
+                    <th>
+                        <div class="form-group">
+                            <input type="hidden" name="device" value="{{strip['name']}}">
+                            <label class="switch">
+                                {% if strip['status'] == True %} <!-- on -->
+                                <input type="hidden" name="{{strip['name']}}" value="off" checked>
+                                <input type="checkbox" name="{{strip['name']}}" value="off" onChange="this.form.submit()" checked>
+                                {% else %}
+                                <input type="checkbox" name="{{strip['name']}}" value="on" onChange="this.form.submit()">
+                                {% endif %}
+                                <div class="slider round"></div>
+                            </label>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="form-group">
+                            <select name="color" onChange="this.form.submit()">
+                            {% for color, status in strip['colors'].items() %}
+                                {% if status == True %}
+                                <option name="{{color}}" value="{{color}}" selected="selected">{{color}}</option>
+                                {% else %}
+                                <option name="{{color}}" value="{{color}}">{{color}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        </div>
+                    </th>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- End led_strips -->
+
     </body>
 </html>
