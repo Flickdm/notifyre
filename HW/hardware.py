@@ -1,11 +1,10 @@
-from gpiozero import RGBLED, OutputDevice
-import logging, weakref
+import logging
+import weakref
 
 from .led_strip import led_strip
 from .output_device import output_device
 
 logger = logging.getLogger(__name__)
-
 
 class Cached_Hardware_Manager(object):
     def __init__(self):
@@ -28,13 +27,12 @@ class Hardware_Factory(object):
 
     def __init__(self, name):
         self.name = name
-        self.output_devices = {};
+        self.output_devices = {}
         self.led_strips = {}
 
     def create_output_device(self, name="pwr", pin=25):
         if name not in self.output_devices:
-            output_object = output_device(OutputDevice(pin))
-            self.output_devices[name] = output_object
+            self.output_devices[name] = output_device(pin)
 
     def create_led_strip(self, name="leds", pins=[18, 23, 24]):
 
@@ -42,8 +40,11 @@ class Hardware_Factory(object):
             raise ValueError("rgbPins should have 3 pins [red, green, blue]")
 
         if name not in self.led_strips:
-            ledStrip_object = led_strip(RGBLED(red=pins[0], green=pins[1], blue=pins[2]))
-            self.led_strips[name] = ledStrip_object
+            self.led_strips[name] = led_strip(red=pins[0], green=pins[1], blue=pins[2])
+
 
 def get_hardware(name):
     return Hardware_Factory.manager.get_hardware(name)
+
+def clear_hardware():
+    return Hardware_Factory.manager.clear()
