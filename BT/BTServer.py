@@ -63,11 +63,11 @@ class BTServer(asyncore.dispatcher):
         """ handle the json returned by the handler
         """
         if "on" in data:
-            HARDWARE.output_devices["power"].on()
+            HARDWARE.output_devices["power"].set_on()
             HARDWARE.led_strips["leds"].set_color_hex("#0000FF")
             HARDWARE.led_strips["leds"].pulse()
         elif "off" in data:
-            HARDWARE.output_devices["power"].off()
+            HARDWARE.output_devices["power"].set_off()
             HARDWARE.led_strips["leds"].set_color_hex("#000000")
         elif "pow" in data:
             HARDWARE.output_devices["power"].toggle()
