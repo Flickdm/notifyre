@@ -1,13 +1,26 @@
-from flask import render_template, request, Blueprint, redirect
+from flask import render_template, request, flash
+from flask import Blueprint, redirect, session
+from flask_security import login_required
 from HW import get_hardware
+
+import random
 
 hw = get_hardware("gpio")
 main = Blueprint('main', __name__)
 
 @main.route('/')
 @main.route('/index')
-@main.route('/index.html')
+#@main.route('/index.html')
 def index():
+    if not session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return redirect('/control')
+
+@main.route('/control')
+@main.route('/control.html')
+#@login_required
+def control():
     output_devices = {}
     for device in hw.output_devices:
             output_devices[device] = hw.output_devices.get(device).get_status()
@@ -21,14 +34,29 @@ def index():
                 }
 
     return render_template(
-        'index.html',
+        'control.html',
         output_devices=output_devices,
         led_strips=led_strips
         )
 
-@main.route('/add')
+@main.route('/add', methods=["GET"])
+#@login_required
 def add_hardware():
     return "add hardware"
+
+@main.route('/login', methods=["POST"])
+def do_admin_login():
+    if request.form['password'] == 'password' and request.form['username'] == 'admin':
+        session['logged_in'] = True
+    else:
+        flash('INCORRECT LOGIN')
+
+    return index()
+
+@main.route("/logout")
+def logout():
+    session['logged_in'] = False
+    return index()
 
 @main.route('/output_devices/', methods=["post"])
 def output_devices():
@@ -37,25 +65,27 @@ def output_devices():
     if device in hw.output_devices:
         hw.output_devices.get(device).toggle()
 
-    return redirect('/')
+    return redirect('/control')
 
 @main.route('/led_strips/', methods=["post"])
 def led_strips():
 
-    print(request.form)
-
     device = request.form.get('device')
     device_state = request.form.get(device)
-    #print(device_state)
     color = request.form.get('color')
 
+    # For some reason it will often send the leds state twice when it shouldn't
+    # be sent at all after color choice has been made this should check if it
+    # was a malformed response the first one won't have a leds field which is
+    # fine but the second one will have two so lets ignore that one
+    malformed_response = len(request.form.getlist('leds'))
+
     if device in hw.led_strips:
-        if device_state == "on":
-            hw.led_strips.get(device).set_color_word(color)
-        elif device_state == "off":
-            hw.led_strips.get(device).set_color_word("none")
+        if color == 'none' and device_state == 'on':
+            #color = hw.led_strips.get(device).get_prev_color()
+            color = 'blue'
+        if device_state == 'off' and malformed_response != 2:
+            color = 'none'
+        hw.led_strips.get(device).set_color_word(color)
 
-
-
-
-    return redirect('/')
+    return redirect('/control')
