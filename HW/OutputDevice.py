@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class output_device(object):
+class IOutputDevice(object):
     def __init__(self, pin):
         self._output_device = OutputDevice(pin)
         self._is_output_device_on = False

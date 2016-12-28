@@ -1,18 +1,18 @@
 import logging
 import weakref
 
-from .led_strip import led_strip
-from .output_device import output_device
+from .LedStrip import ILedStrip
+from .OutputDevice import IOutputDevice
 
 logger = logging.getLogger(__name__)
 
-class Cached_Hardware_Manager(object):
+class CachedHardwareManager(object):
     def __init__(self):
         self._cache = weakref.WeakValueDictionary()
 
     def get_hardware(self, name):
         if name not in self._cache:
-            hw = Hardware_Factory(name)
+            hw = HardwareFactory(name)
             self._cache[name] = hw
         else:
             hw = self._cache[name]
@@ -22,8 +22,8 @@ class Cached_Hardware_Manager(object):
     def clear(self):
         self._cache.clear()
 
-class Hardware_Factory(object):
-    manager = Cached_Hardware_Manager()
+class HardwareFactory(object):
+    manager = CachedHardwareManager()
 
     def __init__(self, name):
         self.name = name
@@ -32,7 +32,7 @@ class Hardware_Factory(object):
 
     def create_output_device(self, name="pwr", pin=25):
         if name not in self.output_devices:
-            self.output_devices[name] = output_device(pin)
+            self.output_devices[name] = IOutputDevice(pin)
 
     def create_led_strip(self, name="leds", pins=[18, 23, 24]):
 
@@ -40,11 +40,11 @@ class Hardware_Factory(object):
             raise ValueError("rgbPins should have 3 pins [red, green, blue]")
 
         if name not in self.led_strips:
-            self.led_strips[name] = led_strip(red=pins[0], green=pins[1], blue=pins[2])
+            self.led_strips[name] = ILedStrip(red=pins[0], green=pins[1], blue=pins[2])
 
 
 def get_hardware(name):
-    return Hardware_Factory.manager.get_hardware(name)
+    return HardwareFactory.manager.get_hardware(name)
 
 def clear_hardware():
-    return Hardware_Factory.manager.clear()
+    return HardwareFactory.manager.clear()
