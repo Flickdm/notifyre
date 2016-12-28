@@ -8,8 +8,8 @@ import random
 hw = get_hardware("gpio")
 main = Blueprint('main', __name__)
 
-@main.route('/')
-@main.route('/index')
+@main.route('/', methods=["GET"])
+@main.route('/index', methods=["GET"])
 #@main.route('/index.html')
 def index():
     if not session.get('logged_in'):
@@ -17,8 +17,8 @@ def index():
     else:
         return redirect('/control')
 
-@main.route('/control')
-@main.route('/control.html')
+@main.route('/control', methods=["GET"])
+@main.route('/control.html', methods=["GET"])
 #@login_required
 def control():
     output_devices = {}
@@ -39,10 +39,15 @@ def control():
         led_strips=led_strips
         )
 
-@main.route('/add', methods=["GET"])
+@main.route('/manage', methods=["GET"])
 #@login_required
-def add_hardware():
-    return "add hardware"
+def manage_hardware():
+    return render_template('manage.html')
+
+@main.route('/settings', methods=["GET"])
+#@login_required
+def manage():
+    return render_template('settings.html')
 
 @main.route('/login', methods=["POST"])
 def do_admin_login():
@@ -58,7 +63,7 @@ def logout():
     session['logged_in'] = False
     return index()
 
-@main.route('/output_devices/', methods=["post"])
+@main.route('/output_devices/', methods=["POST"])
 def output_devices():
 
     device = request.form.get('device')
@@ -67,7 +72,7 @@ def output_devices():
 
     return redirect('/control')
 
-@main.route('/led_strips/', methods=["post"])
+@main.route('/led_strips/', methods=["POST"])
 def led_strips():
 
     device = request.form.get('device')
