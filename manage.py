@@ -24,11 +24,11 @@ import os
 
 from flask_script import Manager
 
-from BT import BTServer
-from HW import get_hardware
-from WEB import create_app
+from notifyre import get_hardware
+from notifyre import create_bluetooth_app
+from notifyre import create_web_app
 
-app = create_app(__name__)
+app = create_web_app(__name__)
 manager = Manager(app)
 
 CONFIG = configparser.ConfigParser()
@@ -56,11 +56,10 @@ def run_servers():
     #Starts Web Server on main thread
     run_web()
 
-
 @manager.command
 def run_bluetooth():
     """ Starts the Bluetooth Server """
-    BTServer(uuid=CONFIG['bt']['uuid'], service_name=CONFIG['bt']['service_name'])
+    create_bluetooth_app(uuid=CONFIG['bt']['uuid'], service_name=CONFIG['bt']['service_name'])
     asyncore.loop(timeout=30.0)
 
 @manager.command

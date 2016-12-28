@@ -2,11 +2,11 @@ from flask import Flask
 from flask_login import LoginManager
 app = None
 
-def create_app(app_name):
+def create_web_app(app_name):
     app = Flask(
         app_name,
-        template_folder='WEB/templates',
-        static_folder='WEB/static'
+        template_folder='notifyre/Web/templates',
+        static_folder='notifyre/Web/static'
         )
 
     from . import views

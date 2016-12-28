@@ -1,7 +1,7 @@
 from flask import render_template, request, flash
 from flask import Blueprint, redirect, session
 from flask_security import login_required
-from HW import get_hardware
+from notifyre import get_hardware
 
 import random
 

@@ -7,7 +7,7 @@ import logging
 import asyncore
 import bluetooth as BT
 
-from HW import get_hardware
+from notifyre import get_hardware
 from .BTHandler import BTHandler
 
 
