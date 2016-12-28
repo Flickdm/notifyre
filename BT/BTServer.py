@@ -15,7 +15,8 @@ HARDWARE = get_hardware("gpio")
 LOGGER = logging.getLogger(__name__)
 
 class BTServer(asyncore.dispatcher):
-    """This class is the server and delegates to the handler when a connection
+    """
+    This class is the server and delegates to the handler when a connection
     is made
     """
     def __init__(self, uuid, service_name, port=BT.PORT_ANY):
