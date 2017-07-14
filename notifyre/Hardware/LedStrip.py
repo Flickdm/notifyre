@@ -33,6 +33,8 @@ class ILedStrip(object):
         self._cur_color = "#0000FF"
         self._prev_color = "#0000FF"
 
+        self._is_pulse = False;
+
         self._defined_colors = {
             "none":     "#000000",
             "red":      "#FF0000",
@@ -51,6 +53,7 @@ class ILedStrip(object):
         """
         Turns RGB on sets to the defined color
         """
+        self._is_pulse = False
         self._led_strip.color = self._cvt_hex(self._cur_color)
 
     # Setter
@@ -58,6 +61,7 @@ class ILedStrip(object):
         """
         Turns RGB off
         """
+        self._is_pulse = False
         self._led_strip.off()
 
     # Setter
@@ -68,6 +72,7 @@ class ILedStrip(object):
         if self._is_valid_hex(color):
             self._led_strip.color = self._cvt_hex(color)
             self._prev_color = self._cur_color
+            self._is_pulse = False
             self._cur_color = color
 
     # Setter
@@ -77,6 +82,7 @@ class ILedStrip(object):
         """
         self._led_strip.color = self._color_map(color)
         self._prev_color = self._cur_color
+        self._is_pulse = False
         self._cur_color = self._color_map(color, return_tuple=False)
 
     # Getter
@@ -84,7 +90,16 @@ class ILedStrip(object):
         """
         returns if the led_strip is lit
         """
+        if self._is_pulse:
+            return True
+
         return self._led_strip.is_lit
+
+    def get_pulse_status(self):
+        """
+        returns true if currently pulsing
+        """
+        return self._is_pulse
 
     def get_prev_color(self):
         """
@@ -118,16 +133,15 @@ class ILedStrip(object):
             self.set_off()
 
 
-    def pulse(self, fade_in_time=5, fade_out_time=5, on_color=(1, 0, 0), off_color=(0, 0, 0)):
+    def pulse(self, fade_in_time=5, fade_out_time=5, off_color=(0, 0, 0)):
         on_color = self._cvt_hex(self._cur_color)
+        self._is_pulse = True
         self._led_strip.pulse(
             fade_in_time=fade_in_time,
             fade_out_time=fade_out_time,
             on_color=on_color,
             off_color=off_color
             )
-
-        self._is_led_strip_on = True
 
     def blue2red(self):
         self._led_strip.pulse(

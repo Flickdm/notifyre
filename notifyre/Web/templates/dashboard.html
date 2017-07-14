@@ -1,0 +1,108 @@
+{%- extends "base.html" %}
+{%- block content %}
+<div class="container">
+    <div class="col">
+    <div class="card-deck-wrapper">
+        <div class="card-deck">
+            <!-- output_devices -->
+            {%- if output_devices %}
+            <div class="card text-md-center">
+                <div class="card-block">
+                    {%- for device, status in output_devices.items() %}
+                    <h4 class="card-title"> {{device|title}}</h4>
+                    <table class="table table-striped table-center">
+                        <thead>
+                            <tr>
+                                <th>On/Off</th>
+                            </tr>
+                        </thead>
+                        <form class="" action="/output_devices/" method="post">
+                            <input type="hidden" name="device" value="{{device}}">
+                            <tr>
+                                <td>
+                                    <label class="switch">
+                                        {%- if status == True %}
+                                        <input type="hidden" name="{{device}}" value="on" checked>
+                                        <input type="checkbox" name="{{device}}" value="on" onChange="this.form.submit()" checked>
+                                        {%- else %}
+                                        <input type="checkbox" name="{{device}}" value="off" onChange="this.form.submit()">
+                                        {%- endif %}
+                                        <div class="slider round"></div>
+                                    </label>
+                                </td>
+                            </tr>
+                        </form>
+                    </table>
+                    {%- endfor %}
+                </div>
+            </div>
+            {%- endif %}
+            <!-- End output_devices -->
+            <!--- is it defined? -->
+            {%- if led_strips %}
+            <!-- led_strips -->
+            {%- for _, strip in led_strips.items() %}
+            <div class="card text-md-center">
+                <div class="card-block">
+                    <h4 class="card-title">{{ strip["name"]|title }}</h4>
+                    <table class="table table-striped" align="center">
+                        <thead>
+                            <tr>
+                                <th>On/Off</th>
+                                <th>Pulse</th>
+                                <th>Color</th>
+                            </tr>
+                        </thead>
+                        <form class="" name="leds" action="/led_strips/" method="post">
+                            <div class="form-group">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <input type="hidden" name="device" value="{{strip['name']}}">
+                                            <label class="switch">
+                                                {%- if strip['status'] == True %} <!-- on -->
+                                                <input type="hidden" name="{{strip['name']}}" value="off" checked>
+                                                <input type="checkbox" name="{{strip['name']}}" value="off" onChange="this.form.submit()" checked>
+                                                {%- else %}
+                                                <input type="checkbox" name="{{strip['name']}}" value="on" onChange="this.form.submit()">
+                                                {%- endif %}
+                                                <div class="slider round"></div>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <label class="switch">
+                                                {%- if strip['pulseStatus'] == True %} <!-- on -->
+                                                <input type="hidden" name="pulse" value="off" checked>
+                                                <input type="checkbox" name="pulse" value="off" onChange="this.form.submit()" checked>
+                                                {%- else %}
+                                                <input type="checkbox" name="pulse" value="on" onChange="this.form.submit()">
+                                                {%- endif %}
+                                                <div class="slider round"></div>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <select name="color" onChange="this.form.submit()">
+                                                {%- for color, status in strip['colors'].items() %}
+                                                {%- if status == True %}
+                                                <option name="{{color}}" value="{{color}}" selected="selected">{{color}}</option>
+                                                {%- else %}
+                                                <option name="{{color}}" value="{{color}}">{{color}}</option>
+                                                {%- endif %}
+                                                {%- endfor %}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {%- endfor %}
+                <!-- End led_strips -->
+                {%- endif %}
+                <!--- is it defined? -->
+            </div>
+        </div>
+    </div>
+</div>
+{%- endblock %}

@@ -8,6 +8,7 @@ import random
 hw = get_hardware("gpio")
 main = Blueprint('main', __name__)
 
+
 @main.route('/', methods=["GET"])
 @main.route('/index', methods=["GET"])
 #@main.route('/index.html')
@@ -15,12 +16,12 @@ def index():
     if not session.get('logged_in'):
         return render_template('login.html')
     else:
-        return redirect('/control')
+        return redirect('/dashboard')
 
-@main.route('/control', methods=["GET"])
-@main.route('/control.html', methods=["GET"])
+@main.route('/dashboard', methods=["GET"])
+@main.route('/dashboard.html', methods=["GET"])
 #@login_required
-def control():
+def dashboard():
     output_devices = {}
     for device in hw.output_devices:
             output_devices[device] = hw.output_devices.get(device).get_status()
@@ -30,11 +31,12 @@ def control():
         led_strips["strip"] = {
                 "name": device,
                 "status": hw.led_strips.get(device).get_status(),
+                "pulseStatus": hw.led_strips.get(device).get_pulse_status(),
                 "colors": hw.led_strips.get(device).get_defined_colors()
                 }
 
     return render_template(
-        'control.html',
+        'dashboard.html',
         output_devices=output_devices,
         led_strips=led_strips
         )
@@ -70,13 +72,14 @@ def output_devices():
     if device in hw.output_devices:
         hw.output_devices.get(device).toggle()
 
-    return redirect('/control')
+    return redirect('/dashboard')
 
 @main.route('/led_strips/', methods=["POST"])
 def led_strips():
 
     device = request.form.get('device')
     device_state = request.form.get(device)
+    pulse_state = request.form.get('pulse')
     color = request.form.get('color')
 
     # For some reason it will often send the leds state twice when it shouldn't
@@ -85,12 +88,19 @@ def led_strips():
     # fine but the second one will have two so lets ignore that one
     malformed_response = len(request.form.getlist('leds'))
 
+    print(request.form)
+
     if device in hw.led_strips:
         if color == 'none' and device_state == 'on':
             #color = hw.led_strips.get(device).get_prev_color()
             color = 'blue'
+            hw.led_strips.get(device).set_color_word(color)
         if device_state == 'off' and malformed_response != 2:
             color = 'none'
+
         hw.led_strips.get(device).set_color_word(color)
 
-    return redirect('/control')
+        if color != 'none' and pulse_state == 'on':
+            hw.led_strips.get(device).pulse()
+
+    return redirect('/dashboard')

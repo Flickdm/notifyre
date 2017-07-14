@@ -1,3 +1,4 @@
+""" Handles creation of Hardware """
 import logging
 import weakref
 
@@ -7,10 +8,27 @@ from .OutputDevice import IOutputDevice
 logger = logging.getLogger(__name__)
 
 class CachedHardwareManager(object):
+    """
+    Handles caching instances of Hardware so that it can be created and used
+    anywhere
+    """
+
     def __init__(self):
+        """
+        instantiates the cache used to store instances
+        """
         self._cache = weakref.WeakValueDictionary()
 
     def get_hardware(self, name):
+        """
+        Instantiates Hardware
+
+        Args:
+            name (`string`): name for instance of hardware
+
+        Returns:
+            Instance of Hardware
+        """
         if name not in self._cache:
             hw = HardwareFactory(name)
             self._cache[name] = hw
@@ -20,9 +38,15 @@ class CachedHardwareManager(object):
         return hw
 
     def clear(self):
+        """
+        Clears hardware cache
+        """
         self._cache.clear()
 
 class HardwareFactory(object):
+    """
+        Handles
+    """
     manager = CachedHardwareManager()
 
     def __init__(self, name):

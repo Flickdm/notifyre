@@ -27,8 +27,10 @@ from flask_script import Manager
 from notifyre import get_hardware
 from notifyre import create_bluetooth_app
 from notifyre import create_web_app
+from notifyre import db
 
 app = create_web_app(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://example.db'
 manager = Manager(app)
 
 CONFIG = configparser.ConfigParser()
@@ -47,12 +49,14 @@ def init_hardware():
     hardware.create_led_strip("leds", [18, 23, 24])
 
 @manager.command
+def init_database():
+    pass
+
+@manager.command
 def run_servers():
     """ Runs both servers on seperate threads """
-
     #Starts bluetooth server on new thread
     threading.Thread(target=run_bluetooth, daemon=True).start()
-
     #Starts Web Server on main thread
     run_web()
 
@@ -65,7 +69,7 @@ def run_bluetooth():
 @manager.command
 def run_web():
     """ Starts the Web Server """
-    app.secret_key = os.urandom(12)
+    app.config['SECRET_KEY'] = 'ITSASECRET'
     app.run(host=CONFIG['web']['ip'], port=CONFIG['web']['port'])
 
 if __name__ == "__main__":
